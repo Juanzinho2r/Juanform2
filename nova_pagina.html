@@ -213,7 +213,7 @@
                 <tr>
                     <th>Bandeira</th>
                     <th>Cidade</th>
-                    <th>Temperatura (°C)</th>
+                    <th>Temperatura (°C / °F)</th>
                     <th>Descrição</th>
                 </tr>
             </thead>
@@ -225,6 +225,10 @@
 
     <script>
         const apiKey = '70f3451e41fab6e345d93079d7ad3f96'; // Sua chave de API
+
+        function convertToFahrenheit(celsius) {
+            return (celsius * 9/5) + 32;
+        }
 
         async function searchWeather() {
             const cityInput = document.getElementById('city-search');
@@ -255,19 +259,24 @@
                         const countryCode = data.sys.country.toLowerCase();
                         const flagUrl = `https://flagpedia.net/data/flags/w580/${countryCode}.webp`;
 
+                        // Temperatura em Celsius
+                        const tempCelsius = data.main.temp;
+                        // Temperatura em Fahrenheit
+                        const tempFahrenheit = convertToFahrenheit(tempCelsius).toFixed(1);
+
                         // Adicionar cidade à tabela
                         const newRow = `
                             <tr>
                                 <td><img src="${flagUrl}" alt="Bandeira de ${data.sys.country}" width="30" height="20"></td>
                                 <td>${data.name}, ${data.sys.country}</td>
-                                <td>${data.main.temp.toFixed(1)}°C</td>
+                                <td>${tempCelsius.toFixed(1)}°C / ${tempFahrenheit}°F</td>
                                 <td>${data.weather[0].description}</td>
                             </tr>
                         `;
                         cityTableBody.insertAdjacentHTML('beforeend', newRow);
 
                         // Salvar cidade no localStorage
-                        saveCity(data.name, data.sys.country, data.main.temp.toFixed(1), data.weather[0].description);
+                        saveCity(data.name, data.sys.country, tempCelsius.toFixed(1), tempFahrenheit, data.weather[0].description);
                         weatherInfo.innerHTML = `Clima em ${data.name} adicionado à tabela.`;
                         cityInput.value = ''; // Limpa o campo após a pesquisa
                     } catch (error) {
@@ -302,19 +311,24 @@
                         const countryCode = data.sys.country.toLowerCase();
                         const flagUrl = `https://flagpedia.net/data/flags/w580/${countryCode}.webp`;
 
+                        // Temperatura em Celsius
+                        const tempCelsius = data.main.temp;
+                        // Temperatura em Fahrenheit
+                        const tempFahrenheit = convertToFahrenheit(tempCelsius).toFixed(1);
+
                         // Adicionar cidade à tabela
                         const newRow = `
                             <tr>
                                 <td><img src="${flagUrl}" alt="Bandeira de ${data.sys.country}" width="30" height="20"></td>
                                 <td>${data.name}, ${data.sys.country}</td>
-                                <td>${data.main.temp.toFixed(1)}°C</td>
+                                <td>${tempCelsius.toFixed(1)}°C / ${tempFahrenheit}°F</td>
                                 <td>${data.weather[0].description}</td>
                             </tr>
                         `;
                         cityTableBody.insertAdjacentHTML('beforeend', newRow);
 
                         // Salvar cidade no localStorage
-                        saveCity(data.name, data.sys.country, data.main.temp.toFixed(1), data.weather[0].description);
+                        saveCity(data.name, data.sys.country, tempCelsius.toFixed(1), tempFahrenheit, data.weather[0].description);
                         weatherInfo.innerHTML = `Clima em ${data.name} adicionado à tabela.`;
                     } catch (error) {
                         console.error('Erro:', error);
@@ -326,13 +340,13 @@
             }
         }
 
-        function saveCity(cityName, country, temp, description) {
+        function saveCity(cityName, country, tempCelsius, tempFahrenheit, description) {
             let cities = JSON.parse(localStorage.getItem('searchedCities')) || [];
             const cityExists = cities.some(city => city.name === cityName);
             if (!cityExists) {
-                cities.push({ name: cityName, country: country, temp: temp, description: description });
+                cities.push({ name: cityName, country: country, tempCelsius: tempCelsius, tempFahrenheit: tempFahrenheit, description: description });
                 localStorage.setItem('searchedCities', JSON.stringify(cities));
-                addCityToTable({ name: cityName, country: country, temp: temp, description: description });
+                addCityToTable({ name: cityName, country: country, tempCelsius: tempCelsius, tempFahrenheit: tempFahrenheit, description: description });
             }
         }
 
@@ -343,7 +357,7 @@
                 <tr>
                     <td><img src="${flagUrl}" alt="Bandeira de ${city.country}" width="30" height="20"></td>
                     <td>${city.name}, ${city.country}</td>
-                    <td>${city.temp}°C</td>
+                    <td>${city.tempCelsius}°C / ${city.tempFahrenheit}°F</td>
                     <td>${city.description}</td>
                 </tr>
             `;
